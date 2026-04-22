@@ -12,12 +12,12 @@ async function bootstrap() {
     forbidNonWhitelisted: true, 
     transform: true, 
   }));
-
+// ✅ config define করতে হবে
   const config = new DocumentBuilder()
-    .setTitle('Products API')
-    .setDescription('Product Inventory API')
+    .setTitle('E-Commerce API')
+    .setDescription('E-Commerce Management System API')
     .setVersion('1.0')
-    .addTag('products')
+    .addBearerAuth() // JWT token এর জন্য
     .build();
 
   

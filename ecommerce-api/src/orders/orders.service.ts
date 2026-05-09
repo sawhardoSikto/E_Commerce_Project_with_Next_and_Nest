@@ -5,6 +5,9 @@ import { Order } from './entities/order.entity';
 import { OrderItem } from './entities/order-item.entity';
 import { CartService } from '../cart/cart.service';
 import { UpdateOrderStatusDto } from './DTOs/update-order-status.dto';
+import { MailService } from 'src/mail/mail.service';
+import { UsersService } from 'src/users/users.service';
+
 
 @Injectable()
 export class OrdersService {
@@ -14,6 +17,8 @@ export class OrdersService {
     @InjectRepository(OrderItem)
     private orderItemsRepo: Repository<OrderItem>,
     private cartService: CartService,
+    private mailService: MailService,    // ✅ add করো
+    private usersService: UsersService,     // ✅ add করো
   ) {}
 
   // Cart থেকে order place করো
@@ -49,6 +54,22 @@ export class OrdersService {
       // ৬. cart থেকে item remove করো
       await this.cartService.removeFromCart(userId, item.id);
     }
+ // ✅ আগে orderData বানাও, তারপর email পাঠাও
+const user = await this.usersService.findById(userId);
+if (!user) throw new NotFoundException('User not found');
+
+const orderData = await this.findOrderById(order.id); // ✅ আগে এটা
+
+await this.mailService.sendOrderConfirmation(
+  user.email,
+  user.name,
+  order.id,
+  totalPrice,
+  orderData.data.orderItems,
+);
+
+return orderData; // ✅ তারপর return
+
 
     // ৭. order with items return করো
     return this.findOrderById(order.id);
@@ -80,6 +101,13 @@ export class OrdersService {
     if (!order) throw new NotFoundException(`Order with id ${orderId} not found`);
     order.status = dto.status;
     await this.ordersRepo.save(order);
+     // ✅ status update email পাঠাও
+    await this.mailService.sendOrderStatusUpdate(
+      order.user.email,
+      order.user.name,
+      orderId,
+      dto.status,
+    );
     return { message: 'Order status updated', data: order };
   }
 }

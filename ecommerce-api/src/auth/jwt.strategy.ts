@@ -16,11 +16,12 @@ export class JwtStrategy extends PassportStrategy(Strategy) {
 
   // token valid হলে এই function call হয়
   // যা return করবে সেটাই req.user হয়ে যাবে
-  async validate(payload: any) {
-    return { 
-      id: payload.sub,      // login এর সময় token এ sub হিসেবে id রেখেছিলাম
-      email: payload.email, 
-      role: payload.role 
-    };
-  }
+ async validate(payload: any) {
+  console.log('JWT Payload:', payload);
+  return { 
+    id: payload.id,       // ✅ sub না, id দাও
+    email: payload.email, 
+    role: payload.role 
+  };
+}
 }

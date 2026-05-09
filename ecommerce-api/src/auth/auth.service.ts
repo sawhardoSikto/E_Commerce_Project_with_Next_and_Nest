@@ -46,7 +46,7 @@ export class AuthService {
         if (!passwordMatch) {
             throw new Error('Invalid email or password');
         }
-        const token = this.jwtService.sign({ id: user.id, email: user.email });
+        const token = this.jwtService.sign({ id: user.id, email: user.email, role: user.role });
         return {
             message: 'Login successful',
             token,

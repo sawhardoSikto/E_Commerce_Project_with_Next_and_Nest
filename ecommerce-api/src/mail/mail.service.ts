@@ -58,4 +58,19 @@ Thank you for shopping with us!
       `,
     });
   }
+  async sendOtp(email: string, name: string, otp: string) {
+  await this.mailerService.sendMail({
+    to: email,
+    subject: 'Password Reset OTP',
+    text: `
+Hi ${name}!
+
+Your OTP for password reset is: ${otp}
+
+This OTP will expire in 10 minutes.
+
+If you did not request this, please ignore this email.
+    `,
+  });
+}
 }

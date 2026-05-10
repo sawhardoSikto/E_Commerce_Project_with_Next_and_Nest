@@ -20,6 +20,11 @@ async function bootstrap() {
     .addBearerAuth() // JWT token এর জন্য
     .build();
 
+
+app.enableCors({
+    origin: 'http://localhost:4000', // NextJS এর URL
+    credentials: true,
+  });
   
   const document = SwaggerModule.createDocument(app, config);
 

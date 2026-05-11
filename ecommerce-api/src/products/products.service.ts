@@ -61,4 +61,10 @@ export class ProductsService {
     });
     return { message: 'Search results', count: products.length, data: products };
   }
+
+  async updateImage(id: number, imageUrl: string) {
+  await this.findOne(id); // product আছে কিনা check করো
+  await this.productsRepo.update(id, { imageUrl });
+  return this.findOne(id);
+}
 }

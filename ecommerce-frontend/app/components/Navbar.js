@@ -10,13 +10,25 @@ export default function Navbar() {
   const [user, setUser] = useState(null);
   const [scrolled, setScrolled] = useState(false);
 
-  useEffect(() => {
-    const userData = localStorage.getItem('user');
-    if (userData) setUser(JSON.parse(userData));
+  const loadUser = () => {
+    try {
+      const userData = localStorage.getItem('user');
+      if (userData && userData !== 'undefined') setUser(JSON.parse(userData));
+      else setUser(null);
+    } catch { localStorage.removeItem('user'); setUser(null); }
+  };
 
+  useEffect(() => {
+    loadUser();
+    window.addEventListener('storage', loadUser);
+    window.addEventListener('userChanged', loadUser);
     const handleScroll = () => setScrolled(window.scrollY > 8);
     window.addEventListener('scroll', handleScroll);
-    return () => window.removeEventListener('scroll', handleScroll);
+    return () => {
+      window.removeEventListener('storage', loadUser);
+      window.removeEventListener('userChanged', loadUser);
+      window.removeEventListener('scroll', handleScroll);
+    };
   }, []);
 
   const handleLogout = () => {

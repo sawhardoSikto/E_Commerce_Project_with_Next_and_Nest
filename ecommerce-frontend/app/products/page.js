@@ -43,8 +43,10 @@ export default function ProductsPage() {
   const [addingId, setAddingId] = useState(null);
 
   useEffect(() => {
-    const userData = localStorage.getItem('user');
-    if (userData) setUser(JSON.parse(userData));
+    try {
+      const userData = localStorage.getItem('user');
+      if (userData && userData !== 'undefined') setUser(JSON.parse(userData));
+    } catch { localStorage.removeItem('user'); }
     fetchProducts();
   }, []);
 

@@ -1,28 +1,53 @@
-import { Controller, Get, Post, Patch, Param, Body, Request, ParseIntPipe } from '@nestjs/common';
+// orders.controller.ts
+
+import {
+  Controller,
+  Get,
+  Post,
+  Patch,
+  Param,
+  Body,
+  Request,
+  ParseIntPipe,
+  UseGuards,
+} from '@nestjs/common';
+
 import { OrdersService } from './orders.service';
 import { UpdateOrderStatusDto } from './DTOs/update-order-status.dto';
 import { Roles } from '../auth/roles.decorator';
 import { RolesGuard } from '../auth/roles.guard';
-import { UseGuards } from '@nestjs/common';
 
 @Controller('orders')
 @UseGuards(RolesGuard)
 export class OrdersController {
   constructor(private ordersService: OrdersService) {}
 
-  // cart থেকে order place করো
+  // customer — cart থেকে order place করো
   @Post()
   placeOrder(@Request() req) {
     return this.ordersService.placeOrder(req.user.id);
   }
 
-  // আমার orders দেখাও
+  // admin — সব orders দেখো
+  @Get()
+  @Roles('admin')
+  findAllOrders() {
+    return this.ordersService.findAllOrders();
+  }
+
+  // customer — নিজের orders দেখো
   @Get('my')
   getMyOrders(@Request() req) {
     return this.ordersService.getMyOrders(req.user.id);
   }
 
-  // admin — order status update করো
+  // single order details
+  @Get(':id')
+  findOne(@Param('id', ParseIntPipe) id: number) {
+    return this.ordersService.findOrderById(id);
+  }
+
+  // admin — order status update
   @Patch(':id/status')
   @Roles('admin')
   updateStatus(

@@ -1,47 +1,61 @@
-import { Injectable, NotFoundException, BadRequestException } from '@nestjs/common';
+// orders.service.ts
+
+import {
+  Injectable,
+  NotFoundException,
+  BadRequestException,
+} from '@nestjs/common';
+
 import { InjectRepository } from '@nestjs/typeorm';
 import { Repository } from 'typeorm';
+
 import { Order } from './entities/order.entity';
 import { OrderItem } from './entities/order-item.entity';
+
 import { CartService } from '../cart/cart.service';
 import { UpdateOrderStatusDto } from './DTOs/update-order-status.dto';
-import { MailService } from 'src/mail/mail.service';
-import { UsersService } from 'src/users/users.service';
 
+import { MailService } from '../mail/mail.service';
+import { UsersService } from '../users/users.service';
 
 @Injectable()
 export class OrdersService {
   constructor(
     @InjectRepository(Order)
     private ordersRepo: Repository<Order>,
+
     @InjectRepository(OrderItem)
     private orderItemsRepo: Repository<OrderItem>,
+
     private cartService: CartService,
-    private mailService: MailService,    // ✅ add করো
-    private usersService: UsersService,     // ✅ add করো
+
+    private mailService: MailService,
+
+    private usersService: UsersService,
   ) {}
 
-  // Cart থেকে order place করো
+  // order place
   async placeOrder(userId: number) {
-    // ১. আমার cart দেখো
+    // cart fetch
     const cart = await this.cartService.getMyCart(userId);
 
-    // ২. cart empty হলে error দাও
+    // cart empty check
     if (cart.count === 0) {
       throw new BadRequestException('Cart is empty');
     }
 
-    // ৩. total price calculate করো
+    // total price
     const totalPrice = parseFloat(cart.total);
 
-    // ৪. Order বানাও
+    // create order
     const order = this.ordersRepo.create({
       userId,
       totalPrice,
     });
+
     await this.ordersRepo.save(order);
 
-    // ৫. প্রতিটা cart item কে order item বানাও
+    // create order items
     for (const item of cart.data) {
       const orderItem = this.orderItemsRepo.create({
         orderId: order.id,
@@ -49,65 +63,136 @@ export class OrdersService {
         quantity: item.quantity,
         price: item.product.price,
       });
+
       await this.orderItemsRepo.save(orderItem);
 
-      // ৬. cart থেকে item remove করো
+      // remove cart item
       await this.cartService.removeFromCart(userId, item.id);
     }
- // ✅ আগে orderData বানাও, তারপর email পাঠাও
-const user = await this.usersService.findById(userId);
-if (!user) throw new NotFoundException('User not found');
 
-const orderData = await this.findOrderById(order.id); // ✅ আগে এটা
+    // user fetch
+    const user = await this.usersService.findById(userId);
 
-await this.mailService.sendOrderConfirmation(
-  user.email,
-  user.name,
-  order.id,
-  totalPrice,
-  orderData.data.orderItems,
-);
+    if (!user) {
+      throw new NotFoundException('User not found');
+    }
 
-return orderData; // ✅ তারপর return
+    // full order data
+    const orderData = await this.findOrderById(order.id);
 
+    // confirmation email
+    await this.mailService.sendOrderConfirmation(
+      user.email,
+      user.name,
+      order.id,
+      totalPrice,
+      orderData.data.orderItems,
+    );
 
-    // ৭. order with items return করো
-    return this.findOrderById(order.id);
+    return {
+      message: 'Order placed successfully',
+      data: orderData.data,
+    };
   }
 
-  // একটা order দেখাও
+  // admin — all orders
+  async findAllOrders() {
+    const orders = await this.ordersRepo.find({
+      relations: [
+        'orderItems',
+        'orderItems.product',
+      ],
+      order: {
+        createdAt: 'DESC',
+      },
+    });
+
+    return {
+      message: 'All orders fetched',
+      count: orders.length,
+      data: orders,
+    };
+  }
+
+  // single order
   async findOrderById(orderId: number) {
     const order = await this.ordersRepo.findOne({
-      where: { id: orderId },
-      relations: ['orderItems', 'orderItems.product'],
+      where: {
+        id: orderId,
+      },
+      relations: [
+        'orderItems',
+        'orderItems.product',
+      ],
     });
-    if (!order) throw new NotFoundException(`Order with id ${orderId} not found`);
-    return { message: 'Order fetched', data: order };
+
+    if (!order) {
+      throw new NotFoundException(
+        `Order with id ${orderId} not found`,
+      );
+    }
+
+    return {
+      message: 'Order fetched',
+      data: order,
+    };
   }
 
-  // আমার সব orders দেখাও
+  // customer orders
   async getMyOrders(userId: number) {
     const orders = await this.ordersRepo.find({
-      where: { userId },
-      relations: ['orderItems', 'orderItems.product'],
-      order: { createdAt: 'DESC' },
+      where: {
+        userId,
+      },
+      relations: [
+        'orderItems',
+        'orderItems.product',
+      ],
+      order: {
+        createdAt: 'DESC',
+      },
     });
-    return { message: 'Orders fetched', count: orders.length, data: orders };
+
+    return {
+      message: 'Orders fetched',
+      count: orders.length,
+      data: orders,
+    };
   }
 
-  // Admin — order status update করো
-  async updateStatus(orderId: number, dto: UpdateOrderStatusDto) {
-    const order = await this.ordersRepo.findOne({ where: { id: orderId } });
-    if (!order) throw new NotFoundException(`Order with id ${orderId} not found`);
+  // admin status update
+  async updateStatus(
+    orderId: number,
+    dto: UpdateOrderStatusDto,
+  ) {
+    const order = await this.ordersRepo.findOne({
+      where: {
+        id: orderId,
+      },
+      relations: ['user'],
+    });
+
+    if (!order) {
+      throw new NotFoundException(
+        `Order with id ${orderId} not found`,
+      );
+    }
+
     order.status = dto.status;
+
     await this.ordersRepo.save(order);
-     // ✅ status update email পাঠাও
+
+    // send email
     await this.mailService.sendOrderStatusUpdate(
       order.user.email,
       order.user.name,
       orderId,
       dto.status,
     );
-    return { message: 'Order status updated', data: order };
+
+    return {
+      message: 'Order status updated',
+      data: order,
+    };
   }
 }

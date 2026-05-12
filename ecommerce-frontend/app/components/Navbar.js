@@ -121,10 +121,10 @@ export default function Navbar() {
                     className="flex items-center gap-2 pl-2 pr-3 py-1.5 rounded-xl hover:bg-gray-50 transition-colors duration-150 group"
                   >
                     <div className="w-7 h-7 rounded-lg bg-gradient-to-br from-violet-500 to-indigo-500 flex items-center justify-center text-white text-xs font-bold shadow-sm">
-                      {user.name[0].toUpperCase()}
+                      {user?.name?.[0]?.toUpperCase()}
                     </div>
                     <span className="text-sm font-medium text-gray-700 hidden sm:block max-w-[100px] truncate">
-                      {user.name}
+                      {user?.name}
                     </span>
                     <svg className="w-3.5 h-3.5 text-gray-400 group-hover:text-gray-600 transition-colors" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
                       <path strokeLinecap="round" strokeLinejoin="round" d="M19.5 8.25l-7.5 7.5-7.5-7.5" />
@@ -137,8 +137,8 @@ export default function Navbar() {
                   >
                     {/* User Info */}
                     <li className="px-4 py-3 border-b border-gray-50">
-                      <p className="text-sm font-semibold text-gray-900 truncate">{user.name}</p>
-                      <p className="text-xs text-gray-400 truncate mt-0.5">{user.email}</p>
+                      <p className="text-sm font-semibold text-gray-900 truncate">{user?.name}</p>
+                      <p className="text-xs text-gray-400 truncate mt-0.5">{user?.email}</p>
                     </li>
 
                     {/* Links */}

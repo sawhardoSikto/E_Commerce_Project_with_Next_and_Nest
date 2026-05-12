@@ -18,23 +18,37 @@ export default function LoginPage() {
   };
 
   const handleSubmit = async (e) => {
-    e.preventDefault();
-    setLoading(true);
-    setError('');
-    try {
-      const res = await api.post('/auth/login', form);
-      const token = res.data.token || res.data.access_token;
-      const user = res.data.user || res.data.data?.user || res.data.data;
-      if (token) localStorage.setItem('token', token);
-      if (user && typeof user === 'object') localStorage.setItem('user', JSON.stringify(user));
-      window.dispatchEvent(new Event('userChanged'));
-      router.push('/products');
-    } catch (err) {
-      setError(err.response?.data?.message || 'Invalid email or password.');
-    } finally {
-      setLoading(false);
+  e.preventDefault();
+  setLoading(true);
+  setError('');
+  try {
+    // ১. Login → token পাও
+    const res = await api.post('/auth/login', form);
+    const token = res.data.token;
+    localStorage.setItem('token', token);
+
+    // ২. current-user call করো
+    const userRes = await api.get('/auth/current-user', {
+      headers: { Authorization: `Bearer ${token}` },
+    });
+
+    const user = userRes.data;
+    localStorage.setItem('user', JSON.stringify(user));
+    window.dispatchEvent(new Event('userChanged'));
+
+    // ৩. role দেখে redirect
+    if (user.role === 'admin') {
+      window.location.href = '/admin';
+    } else {
+      window.location.href = '/products';
     }
-  };
+
+  } catch (err) {
+    setError(err.response?.data?.message || 'Login failed');
+  } finally {
+    setLoading(false);
+  }
+};
 
   return (
     <div className="min-h-screen bg-gray-50 flex items-center justify-center px-4">

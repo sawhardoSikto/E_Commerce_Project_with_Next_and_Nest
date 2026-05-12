@@ -7,10 +7,11 @@ import { TypeOrmModule } from '@nestjs/typeorm'; // ✅
 import { CartModule } from '../cart/cart.module'; // ✅
 import { UsersModule } from '../users/users.module'; // ✅
 import { MailModule } from '../mail/mail.module'; // ✅
+import { Product } from 'src/products/entities/product.entity';
 
 @Module({
   imports: [
-    TypeOrmModule.forFeature([Order, OrderItem]),
+    TypeOrmModule.forFeature([Order, OrderItem, Product]), // ✅
     CartModule,
     MailModule,
     UsersModule,

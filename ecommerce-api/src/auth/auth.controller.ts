@@ -25,6 +25,10 @@ export class AuthController {
     async getProfile(@Request() req) {
         return this.authService.getProfile(req.user.id);
     }
+    @Get('current-user')
+getCurrentUser(@Request() req) {
+  return req.user;
+}
     @IsPublic()
 @Post('forgot-password')
 forgotPassword(@Body() dto: ForgotPasswordDto) {

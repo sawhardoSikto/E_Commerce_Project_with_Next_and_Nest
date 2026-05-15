@@ -18,62 +18,48 @@ export default function LoginPage() {
   };
 
   const handleSubmit = async (e) => {
-  e.preventDefault();
-  setLoading(true);
-  setError('');
-  try {
-    // ১. Login → token পাও
-    const res = await api.post('/auth/login', form);
-    const token = res.data.token;
-    localStorage.setItem('token', token);
-
-    // ২. current-user call করো
-    const userRes = await api.get('/auth/current-user', {
-      headers: { Authorization: `Bearer ${token}` },
-    });
-
-    const user = userRes.data;
-    localStorage.setItem('user', JSON.stringify(user));
-    window.dispatchEvent(new Event('userChanged'));
-
-    // ৩. role দেখে redirect
-    if (user.role === 'admin') {
-      window.location.href = '/admin';
-    } else {
-      window.location.href = '/products';
+    e.preventDefault();
+    setLoading(true);
+    setError('');
+    try {
+      const res = await api.post('/auth/login', form);
+      const token = res.data.token || res.data.access_token;
+      const user = res.data.user || res.data.data?.user || res.data.data;
+      if (token) localStorage.setItem('token', token);
+      if (user && typeof user === 'object') localStorage.setItem('user', JSON.stringify(user));
+      window.dispatchEvent(new Event('userChanged'));
+      router.push('/products');
+    } catch (err) {
+      setError(err.response?.data?.message || 'Invalid email or password.');
+    } finally {
+      setLoading(false);
     }
-
-  } catch (err) {
-    setError(err.response?.data?.message || 'Login failed');
-  } finally {
-    setLoading(false);
-  }
-};
+  };
 
   return (
     <div className="min-h-screen bg-gray-50 flex items-center justify-center px-4">
-      <div className="w-full max-w-sm">
+      <div className="w-full max-w-xs">
 
         {/* Logo */}
-        <div className="text-center mb-8">
-          <Link href="/products" className="inline-flex items-center gap-2 mb-6">
-            <div className="w-9 h-9 rounded-xl bg-gradient-to-br from-violet-600 to-indigo-600 flex items-center justify-center shadow-sm">
-              <svg className="w-5 h-5 text-white" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2.5}>
+        <div className="text-center mb-5">
+          <Link href="/products" className="inline-flex items-center gap-2 mb-4">
+            <div className="w-7 h-7 rounded-lg bg-gradient-to-br from-violet-600 to-indigo-600 flex items-center justify-center">
+              <svg className="w-4 h-4 text-white" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2.5}>
                 <path strokeLinecap="round" strokeLinejoin="round" d="M2.25 3h1.386c.51 0 .955.343 1.087.835l.383 1.437M7.5 14.25a3 3 0 00-3 3h15.75m-12.75-3h11.218c1.121-2.3 2.1-4.684 2.924-7.138a60.114 60.114 0 00-16.536-1.84M7.5 14.25L5.106 5.272M6 20.25a.75.75 0 11-1.5 0 .75.75 0 011.5 0zm12.75 0a.75.75 0 11-1.5 0 .75.75 0 011.5 0z" />
               </svg>
             </div>
-            <span className="text-xl font-bold tracking-tight text-gray-900">Shop<span className="text-indigo-600">Nest</span></span>
+            <span className="text-base font-bold tracking-tight text-gray-900">Shop<span className="text-indigo-600">Nest</span></span>
           </Link>
-          <h1 className="text-2xl font-extrabold text-gray-900">Welcome back</h1>
-          <p className="text-sm text-gray-500 mt-1">Sign in to your account</p>
+          <h1 className="text-lg font-extrabold text-gray-900">Welcome back</h1>
+          <p className="text-xs text-gray-400 mt-0.5">Sign in to your account</p>
         </div>
 
         {/* Card */}
-        <div className="bg-white rounded-2xl border border-gray-100 shadow-sm shadow-gray-100 p-6">
+        <div className="bg-white rounded-xl border border-gray-100 shadow-sm p-5">
 
           {/* Error */}
           {error && (
-            <div className="flex items-center gap-2 px-3 py-2.5 bg-red-50 border border-red-100 rounded-xl mb-4 text-sm text-red-600">
+            <div className="flex items-center gap-2 px-3 py-2 bg-red-50 border border-red-100 rounded-lg mb-3 text-xs text-red-600">
               <svg className="w-4 h-4 shrink-0" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
                 <path strokeLinecap="round" strokeLinejoin="round" d="M12 9v3.75m9-.75a9 9 0 11-18 0 9 9 0 0118 0zm-9 3.75h.008v.008H12v-.008z" />
               </svg>
@@ -81,10 +67,10 @@ export default function LoginPage() {
             </div>
           )}
 
-          <form onSubmit={handleSubmit} className="space-y-4">
+          <form onSubmit={handleSubmit} className="space-y-3">
             {/* Email */}
             <div>
-              <label className="block text-xs font-semibold text-gray-700 mb-1.5">Email</label>
+              <label className="block text-xs font-medium text-gray-600 mb-1">Email</label>
               <input
                 type="email"
                 name="email"
@@ -92,7 +78,7 @@ export default function LoginPage() {
                 onChange={handleChange}
                 placeholder="you@example.com"
                 required
-                className="w-full px-3 py-2.5 text-sm bg-gray-50 border border-gray-200 rounded-xl focus:outline-none focus:border-indigo-400 focus:ring-2 focus:ring-indigo-100 focus:bg-white transition-all placeholder:text-gray-400"
+                className="w-full px-3 py-2 text-xs bg-gray-50 border border-gray-200 rounded-lg focus:outline-none focus:border-indigo-400 focus:ring-2 focus:ring-indigo-100 focus:bg-white transition-all placeholder:text-gray-400"
               />
             </div>
 
@@ -100,7 +86,7 @@ export default function LoginPage() {
             <div>
               <div className="flex items-center justify-between mb-1.5">
                 <label className="block text-xs font-semibold text-gray-700">Password</label>
-                <Link href="/forgot-password" className="text-xs text-indigo-600 hover:text-indigo-700">
+                <Link href="/forgot-password" className="text-[11px] text-indigo-500 hover:text-indigo-600">
                   Forgot password?
                 </Link>
               </div>
@@ -112,7 +98,7 @@ export default function LoginPage() {
                   onChange={handleChange}
                   placeholder="••••••••"
                   required
-                  className="w-full px-3 py-2.5 pr-10 text-sm bg-gray-50 border border-gray-200 rounded-xl focus:outline-none focus:border-indigo-400 focus:ring-2 focus:ring-indigo-100 focus:bg-white transition-all placeholder:text-gray-400"
+                  className="w-full px-3 py-2 pr-9 text-xs bg-gray-50 border border-gray-200 rounded-lg focus:outline-none focus:border-indigo-400 focus:ring-2 focus:ring-indigo-100 focus:bg-white transition-all placeholder:text-gray-400"
                 />
                 <button
                   type="button"
@@ -137,7 +123,7 @@ export default function LoginPage() {
             <button
               type="submit"
               disabled={loading}
-              className="w-full flex items-center justify-center gap-2 py-2.5 text-sm font-semibold text-white bg-indigo-600 hover:bg-indigo-700 disabled:opacity-60 rounded-xl shadow-sm shadow-indigo-200 transition-all duration-150 active:scale-[0.98] mt-1"
+              className="w-full flex items-center justify-center gap-2 py-2 text-xs font-semibold text-white bg-indigo-600 hover:bg-indigo-700 disabled:opacity-60 rounded-lg shadow-sm shadow-indigo-200 transition-all active:scale-[0.98]"
             >
               {loading ? <span className="loading loading-spinner loading-xs" /> : null}
               {loading ? 'Signing in...' : 'Sign in'}
@@ -146,7 +132,7 @@ export default function LoginPage() {
         </div>
 
         {/* Footer */}
-        <p className="text-center text-sm text-gray-500 mt-5">
+        <p className="text-center text-xs text-gray-400 mt-4">
           Don&apos;t have an account?{' '}
           <Link href="/register" className="text-indigo-600 font-semibold hover:text-indigo-700">
             Create one

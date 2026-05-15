@@ -79,11 +79,11 @@ export default function CartPage() {
         </div>
       )}
 
-      <div className="max-w-5xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
+      <div className="max-w-4xl mx-auto px-4 sm:px-6 lg:px-8 py-4">
 
         {/* Header */}
-        <div className="flex items-center gap-3 mb-6">
-          <h1 className="text-xl font-extrabold text-gray-900">My Cart</h1>
+        <div className="flex items-center gap-2 mb-4">
+          <h1 className="text-sm font-bold text-gray-900">My Cart</h1>
           {cart.length > 0 && (
             <span className="px-2 py-0.5 text-xs font-bold bg-indigo-100 text-indigo-700 rounded-full">
               {cart.length} {cart.length === 1 ? 'item' : 'items'}
@@ -95,7 +95,7 @@ export default function CartPage() {
           <div className="space-y-3">
             {[...Array(3)].map((_, i) => (
               <div key={i} className="bg-white rounded-2xl border border-gray-100 p-4 flex gap-4">
-                <div className="w-20 h-20 rounded-xl bg-gray-100 animate-pulse shrink-0" />
+                <div className="w-14 h-14 rounded-lg bg-gray-100 animate-pulse shrink-0" />
                 <div className="flex-1 space-y-2 py-1">
                   <div className="h-4 bg-gray-100 rounded animate-pulse w-2/3" />
                   <div className="h-3 bg-gray-100 rounded animate-pulse w-1/3" />
@@ -120,16 +120,16 @@ export default function CartPage() {
             </Link>
           </div>
         ) : (
-          <div className="flex flex-col lg:flex-row gap-6">
+          <div className="flex flex-col lg:flex-row gap-4">
 
             {/* Cart Items */}
-            <div className="flex-1 space-y-3">
+            <div className="flex-1 space-y-2">
               {cart.map((item) => (
                 <div key={item.id}
-                  className="bg-white rounded-2xl border border-gray-100 hover:border-gray-200 transition-colors p-4 flex gap-4 items-start">
+                  className="bg-white rounded-xl border border-gray-100 hover:border-gray-200 transition-colors p-3 flex gap-3 items-start">
 
                   {/* Image */}
-                  <div className="w-20 h-20 rounded-xl bg-gray-50 border border-gray-100 overflow-hidden shrink-0">
+                  <div className="w-14 h-14 rounded-lg bg-gray-50 border border-gray-100 overflow-hidden shrink-0">
                     {item.product?.imageUrl ? (
                       <img src={`http://localhost:3000${item.product.imageUrl}`} alt={item.product.name}
                         className="w-full h-full object-cover" />
@@ -144,9 +144,9 @@ export default function CartPage() {
 
                   {/* Info */}
                   <div className="flex-1 min-w-0">
-                    <h3 className="font-semibold text-gray-900 text-sm line-clamp-1">{item.product?.name}</h3>
+                    <h3 className="font-semibold text-gray-900 text-xs line-clamp-1">{item.product?.name}</h3>
                     <p className="text-xs text-gray-400 mt-0.5">{item.product?.category}</p>
-                    <div className="flex items-center gap-3 mt-2">
+                    <div className="flex items-center gap-2 mt-1">
                       <span className="text-xs text-gray-500">Qty: <span className="font-semibold text-gray-800">{item.quantity}</span></span>
                       <span className="text-xs text-gray-300">•</span>
                       <span className="text-xs text-gray-500">${item.product?.price} each</span>
@@ -155,7 +155,7 @@ export default function CartPage() {
 
                   {/* Right side */}
                   <div className="flex flex-col items-end gap-2 shrink-0">
-                    <span className="text-base font-bold text-gray-900">
+                    <span className="text-sm font-bold text-gray-900">
                       ${((item.product?.price ?? 0) * item.quantity).toFixed(2)}
                     </span>
                     <button
@@ -175,11 +175,11 @@ export default function CartPage() {
             </div>
 
             {/* Summary */}
-            <div className="lg:w-72 shrink-0">
-              <div className="bg-white rounded-2xl border border-gray-100 p-5 sticky top-24">
-                <h2 className="font-bold text-gray-900 text-sm mb-4">Order Summary</h2>
+            <div className="lg:w-60 shrink-0">
+              <div className="bg-white rounded-xl border border-gray-100 p-4 sticky top-16">
+                <h2 className="font-bold text-gray-900 text-xs mb-3">Order Summary</h2>
 
-                <div className="space-y-2.5 mb-4">
+                <div className="space-y-2 mb-3">
                   {cart.map((item) => (
                     <div key={item.id} className="flex justify-between text-xs text-gray-500">
                       <span className="truncate max-w-[140px]">{item.product?.name} × {item.quantity}</span>
@@ -190,17 +190,17 @@ export default function CartPage() {
                   ))}
                 </div>
 
-                <div className="border-t border-gray-100 pt-3 mb-4">
+                <div className="border-t border-gray-100 pt-2 mb-3">
                   <div className="flex justify-between items-center">
-                    <span className="text-sm font-semibold text-gray-700">Total</span>
-                    <span className="text-lg font-extrabold text-gray-900">${subtotal.toFixed(2)}</span>
+                    <span className="text-xs font-semibold text-gray-700">Total</span>
+                    <span className="text-base font-extrabold text-gray-900">${subtotal.toFixed(2)}</span>
                   </div>
                 </div>
 
                 <button
                   onClick={handlePlaceOrder}
                   disabled={placingOrder}
-                  className="w-full flex items-center justify-center gap-2 py-2.5 text-sm font-semibold text-white bg-indigo-600 hover:bg-indigo-700 disabled:opacity-60 rounded-xl shadow-sm shadow-indigo-200 transition-all active:scale-[0.98]"
+                  className="w-full flex items-center justify-center gap-2 py-2 text-xs font-semibold text-white bg-indigo-600 hover:bg-indigo-700 disabled:opacity-60 rounded-lg shadow-sm shadow-indigo-200 transition-all active:scale-[0.98]"
                 >
                   {placingOrder ? <span className="loading loading-spinner loading-xs" /> : null}
                   {placingOrder ? 'Placing order...' : 'Place Order'}

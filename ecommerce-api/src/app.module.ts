@@ -5,7 +5,7 @@ import { ConfigModule, ConfigService } from '@nestjs/config';
 import { TypeOrmModule } from '@nestjs/typeorm';
 import { AuthModule } from './auth/auth.module';
 import { UsersModule } from './users/users.module';
-import { APP_GUARD } from '@nestjs/core'; // ✅ import করো
+import { APP_GUARD } from '@nestjs/core'; 
 import { JwtGuard } from './auth/jwt.guard';
 import { ProductsModule } from './products/products.module';
 import { CartModule } from './cart/cart.module';
@@ -51,16 +51,17 @@ import { MailModule } from './mail/mail.module';
           from: `"E-Commerce" <${configService.get('MAIL_USER')}>`,
         },
       }),
-      inject: [ConfigService], // ✅ এটা missing ছিল
+      inject: [ConfigService], 
     }),
     MailModule,
   ],
   controllers: [AppController],
+  //sob route automatically protected
   providers: [
     AppService,
     {
-      provide: APP_GUARD, // ✅ string না, import করা token
-      useClass: JwtGuard,
+      provide: APP_GUARD, 
+      useClass: JwtGuard, // 
     },
   ],
 })

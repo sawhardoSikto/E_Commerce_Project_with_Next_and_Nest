@@ -35,102 +35,101 @@ export class OrdersService {
     private mailService: MailService,
 
     private usersService: UsersService,
-  ) {}
+  ) { }
 
   // order place
-  // order place
-async placeOrder(userId: number) {
+  async placeOrder(userId: number) {
 
-  // cart fetch
-  const cart = await this.cartService.getMyCart(userId);
+    // cart fetch
+    const cart = await this.cartService.getMyCart(userId);
 
-  // empty cart check
-  if (cart.count === 0) {
-    throw new BadRequestException('Cart is empty');
-  }
-
-  // total price
-  const totalPrice = parseFloat(cart.total);
-
-  // create order
-  const order = this.ordersRepo.create({
-    userId,
-    totalPrice,
-  });
-
-  await this.ordersRepo.save(order);
-
-  // create order items + stock reduce
-  for (const item of cart.data) {
-
-    // product find
-    const product = await this.productsRepo.findOne({
-      where: {
-        id: item.product.id,
-      },
-    });
-
-    // product check
-    if (!product) {
-      throw new NotFoundException(
-        `Product with id ${item.product.id} not found`,
-      );
+    // empty cart check
+    if (cart.count === 0) {
+      throw new BadRequestException('Cart is empty');
     }
 
-    // stock check
-    if (product.stock < item.quantity) {
-      throw new BadRequestException(
-        `${product.name} is out of stock`,
-      );
-    }
+    // total price
+    const totalPrice = parseFloat(cart.total);
 
-    // create order item
-    const orderItem = this.orderItemsRepo.create({
-      orderId: order.id,
-      productId: item.product.id,
-      quantity: item.quantity,
-      price: item.product.price,
-    });
-
-    await this.orderItemsRepo.save(orderItem);
-
-    // reduce stock
-    product.stock -= item.quantity;
-
-    // save updated product
-    await this.productsRepo.save(product);
-
-    // remove cart item
-    await this.cartService.removeFromCart(
+    // create order
+    const order = this.ordersRepo.create({
       userId,
-      item.id,
+      totalPrice,
+    });
+
+    await this.ordersRepo.save(order);
+
+    // create order items + stock reduce
+    for (const item of cart.data) {
+
+      // product find
+      const product = await this.productsRepo.findOne({
+        where: {
+          id: item.product.id,
+        },
+      });
+
+      // product check
+      if (!product) {
+        throw new NotFoundException(
+          `Product with id ${item.product.id} not found`,
+        );
+      }
+
+      // stock check
+      if (product.stock < item.quantity) {
+        throw new BadRequestException(
+          `${product.name} is out of stock`,
+        );
+      }
+
+      // create order item
+      const orderItem = this.orderItemsRepo.create({
+        orderId: order.id,
+        productId: item.product.id,
+        quantity: item.quantity,
+        price: item.product.price,
+      });
+
+      await this.orderItemsRepo.save(orderItem);
+
+      // reduce stock
+      product.stock -= item.quantity;
+
+      // save updated product
+      await this.productsRepo.save(product);
+
+      // remove cart item
+      await this.cartService.removeFromCart(
+        userId,
+        item.id,
+      );
+    }
+
+    // user fetch
+    const user = await this.usersService.findById(userId);
+
+    if (!user) {
+      throw new NotFoundException('User not found');
+    }
+
+    // full order data
+    const orderData = await this.findOrderById(order.id);
+
+    // send confirmation email
+    await this.mailService.sendOrderConfirmation(
+      user.email,
+      user.name,
+      order.id,
+      totalPrice,
+      orderData.data.orderItems,
     );
+
+    return {
+      message: 'Order placed successfully',
+      data: orderData.data,
+    };
   }
-
-  // user fetch
-  const user = await this.usersService.findById(userId);
-
-  if (!user) {
-    throw new NotFoundException('User not found');
-  }
-
-  // full order data
-  const orderData = await this.findOrderById(order.id);
-
-  // send confirmation email
-  await this.mailService.sendOrderConfirmation(
-    user.email,
-    user.name,
-    order.id,
-    totalPrice,
-    orderData.data.orderItems,
-  );
-
-  return {
-    message: 'Order placed successfully',
-    data: orderData.data,
-  };
-}
 
   // admin — all orders
   async findAllOrders() {

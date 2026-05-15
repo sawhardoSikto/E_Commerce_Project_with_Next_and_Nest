@@ -22,17 +22,19 @@ export class UsersService {
              password :hashedPassword});
         return this.userRepository.save(user);
     }
-    // ✅ OTP save করো
+    
   async saveOtp(userId: number, otp: string, expiry: Date): Promise<void> {
     await this.userRepository.update(userId, { otp, otpExpiry: expiry });
   }
 
-  // ✅ OTP clear করো এবং password update করো
+  // 
   async resetPassword(userId: number, hashedPassword: string): Promise<void> {
     await this.userRepository.update(userId, {
       password: hashedPassword,
       otp: null,
       otpExpiry: null,
     });
+
+    
   }
 }

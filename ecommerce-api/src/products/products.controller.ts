@@ -14,7 +14,7 @@ import { Roles } from '../auth/roles.decorator';
 import { RolesGuard } from '../auth/roles.guard';
 import { IsPublic } from '../auth/public.decorator';
 
-// ✅ Controller এর বাইরে রাখো
+
 const multerConfig = {
   storage: diskStorage({
     destination: './uploads',
@@ -35,7 +35,7 @@ const multerConfig = {
 @Controller('products')
 @UseGuards(RolesGuard)
 export class ProductsController {
-  constructor(private productsService: ProductsService) {}
+  constructor(private productsService: ProductsService) { }
 
   @Post()
   @Roles('admin')
@@ -85,7 +85,7 @@ export class ProductsController {
     return this.productsService.remove(id);
   }
 
-  // ✅ Image upload route
+  //image upload route
   @Post(':id/upload')
   @Roles('admin')
   @UseInterceptors(FileInterceptor('image', multerConfig))

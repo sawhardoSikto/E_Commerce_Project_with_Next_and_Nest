@@ -8,21 +8,21 @@ import { join } from 'path';
 import { DocumentBuilder, SwaggerModule } from '@nestjs/swagger';
 
 async function bootstrap() {
-  const app = await NestFactory.create<NestExpressApplication>(AppModule); // ✅
+  const app = await NestFactory.create<NestExpressApplication>(AppModule); // 
 
   app.useGlobalPipes(new ValidationPipe({ 
-    whitelist: true, 
-    forbidNonWhitelisted: true, 
-    transform: true, 
+    whitelist: true, //dto te jegulo nai segulo remove kore dibe
+    forbidNonWhitelisted: true, // dto te jei fields nai segulo thakle error throw korbe
+    transform: true, // incoming data ke automatically dto te convert kore dibe
   }));
-// ✅ config define করতে হবে
+
   const config = new DocumentBuilder()
     .setTitle('E-Commerce API')
     .setDescription('E-Commerce Management System API')
     .setVersion('1.0')
-    .addBearerAuth() // JWT token এর জন্য
+    .addBearerAuth() 
     .build();
-// ✅ uploads folder কে publicly accessible করো
+// ✅ uploads folder ke publicly accessible korrar jonno
   app.useStaticAssets(join(__dirname, '..', 'uploads'), {
     prefix: '/uploads',
   });

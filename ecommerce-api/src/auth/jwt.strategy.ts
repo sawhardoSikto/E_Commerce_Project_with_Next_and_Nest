@@ -7,19 +7,19 @@ import { ConfigService } from '@nestjs/config';
 export class JwtStrategy extends PassportStrategy(Strategy) {
   constructor(private configService: ConfigService) {
     super({
-      // Header থেকে "Bearer eyJ..." বের করে
+      // Header theke "Bearer eyJ..." ber kore
       jwtFromRequest: ExtractJwt.fromAuthHeaderAsBearerToken(),
-      // secret দিয়ে token verify করে
+      // secret key diye token verify kore
       secretOrKey: configService.get('JWT_SECRET') as string,
     });
   }
 
-  // token valid হলে এই function call হয়
-  // যা return করবে সেটাই req.user হয়ে যাবে
+  // token valid hole ei function call hobe, payload parameter e token er data thakbe
+  // ja return korbe seta request.user e set hobe
  async validate(payload: any) {
   console.log('JWT Payload:', payload);
   return { 
-    id: payload.id,       // ✅ sub না, id দাও
+    id: payload.id,       
     email: payload.email, 
     role: payload.role 
   };

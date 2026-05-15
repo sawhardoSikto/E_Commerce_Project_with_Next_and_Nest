@@ -63,7 +63,7 @@ export class ProductsService {
   }
 
   async updateImage(id: number, imageUrl: string) {
-  await this.findOne(id); // product আছে কিনা check করো
+  await this.findOne(id); // product ache kina check
   await this.productsRepo.update(id, { imageUrl });
   return this.findOne(id);
 }

@@ -13,13 +13,13 @@ export class CartService {
     private productsService: ProductsService,
   ) {}
 
-  // Cart এ product add করো
+  // Cart e product add 
   async addToCart(userId: number, dto: AddToCartDto) {
-    // ১. product আছে কিনা check করো
+    // product ache kina check 
     const productData = await this.productsService.findOne(dto.productId);
     const product = productData.data;
 
-    // ২. এই user এর cart এ এই product আগে আছে কিনা check করো
+    // ei user er cart e ei product ache kina check 
     const existing = await this.cartRepo.findOne({
       where: {
         user: { id: userId },
@@ -27,14 +27,14 @@ export class CartService {
       },
     });
 
-    // ৩. আগে থেকে থাকলে quantity বাড়াও
+    // jodi thake tahole quantity update hobe
     if (existing) {
       existing.quantity += dto.quantity;
       await this.cartRepo.save(existing);
       return { message: 'Cart updated', data: existing };
     }
 
-    // ৪. না থাকলে নতুন item বানাও
+    // na thekle notun cart item create hobe
     const cartItem = this.cartRepo.create({
       user: { id: userId },
       product: { id: product.id },
@@ -44,13 +44,13 @@ export class CartService {
     return { message: 'Product added to cart', data: cartItem };
   }
 
-  // আমার cart দেখাও
+  
   async getMyCart(userId: number) {
     const items = await this.cartRepo.find({
       where: { user: { id: userId } },
     });
 
-    // total price calculate করো
+    // total price calculate 
     const total = items.reduce((sum, item) => {
       return sum + Number(item.product.price) * item.quantity;
     }, 0);
@@ -63,7 +63,7 @@ export class CartService {
     };
   }
 
-  // Cart থেকে item remove করো
+  // Cart theke product remove
   async removeFromCart(userId: number, cartItemId: number) {
     const item = await this.cartRepo.findOne({
       where: { id: cartItemId, user: { id: userId } },

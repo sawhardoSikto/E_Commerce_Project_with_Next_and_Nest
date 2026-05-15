@@ -22,20 +22,20 @@ import { RolesGuard } from '../auth/roles.guard';
 export class OrdersController {
   constructor(private ordersService: OrdersService) {}
 
-  // customer — cart থেকে order place করো
+  // cart theke order place korar jonno
   @Post()
   placeOrder(@Request() req) {
     return this.ordersService.placeOrder(req.user.id);
   }
 
-  // admin — সব orders দেখো
+  // admin — sob order dekhbe
   @Get()
   @Roles('admin')
   findAllOrders() {
     return this.ordersService.findAllOrders();
   }
 
-  // customer — নিজের orders দেখো
+  // customer nijer orders dekhbe
   @Get('my')
   getMyOrders(@Request() req) {
     return this.ordersService.getMyOrders(req.user.id);

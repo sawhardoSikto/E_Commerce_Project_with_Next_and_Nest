@@ -17,12 +17,15 @@ export class User {
   @Column({ default: 'customer' })
   role: string;  // 'customer' অথবা 'admin'
 
-  
-  @Column({ nullable: true, type: 'varchar' }) // ✅ type দাও
-otp: string | null;
+  @Column({ nullable: true })
+  phone: string;
 
-@Column({ nullable: true, type: 'timestamp' }) // ✅ type দাও
-otpExpiry: Date | null;
+
+  @Column({ nullable: true, type: 'varchar' }) // ✅ type দাও
+  otp: string | null;
+
+  @Column({ nullable: true, type: 'timestamp' }) // ✅ type দাও
+  otpExpiry: Date | null;
 
   @CreateDateColumn()
   createdAt: Date;

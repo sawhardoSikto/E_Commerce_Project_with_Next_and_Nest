@@ -159,6 +159,7 @@ export class OrdersService {
       relations: [
         'orderItems',
         'orderItems.product',
+        'user',
       ],
     });
 
@@ -183,6 +184,7 @@ export class OrdersService {
       relations: [
         'orderItems',
         'orderItems.product',
+        'user',
       ],
       order: {
         createdAt: 'DESC',

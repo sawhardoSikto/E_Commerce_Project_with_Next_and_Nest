@@ -15,13 +15,10 @@ export class UsersService {
         return this.userRepository.findOne({ where: { id } });
     }
 
-    async create(name: string, email: string, hashedPassword: string): Promise<User> {
-        const user = this.userRepository.create({
-             name, 
-             email, 
-             password :hashedPassword});
-        return this.userRepository.save(user);
-    }
+    async create(name: string, email: string, hashedPassword: string, phone?: string): Promise<User> {
+  const user = this.userRepository.create({ name, email, password: hashedPassword, phone });
+  return this.userRepository.save(user);
+}
     
   async saveOtp(userId: number, otp: string, expiry: Date): Promise<void> {
     await this.userRepository.update(userId, { otp, otpExpiry: expiry });
@@ -36,5 +33,13 @@ export class UsersService {
     });
 
     
+
+    
   }
+  async findAll() {
+  return this.userRepository.find({
+    select: ['id', 'name', 'email', 'phone', 'role', 'createdAt'],
+    order: { createdAt: 'DESC' },
+  });
+}
 }

@@ -26,6 +26,7 @@ export class AuthService {
             dto.name,
             dto.email,
             hashedPassword,
+            dto.phone,
         );
         return {
             message: 'User registered successfully',

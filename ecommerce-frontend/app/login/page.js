@@ -17,24 +17,38 @@ export default function LoginPage() {
     setError('');
   };
 
-  const handleSubmit = async (e) => {
-    e.preventDefault();
-    setLoading(true);
-    setError('');
-    try {
-      const res = await api.post('/auth/login', form);
-      const token = res.data.token || res.data.access_token;
-      const user = res.data.user || res.data.data?.user || res.data.data;
-      if (token) localStorage.setItem('token', token);
-      if (user && typeof user === 'object') localStorage.setItem('user', JSON.stringify(user));
-      window.dispatchEvent(new Event('userChanged'));
-      router.push('/products');
-    } catch (err) {
-      setError(err.response?.data?.message || 'Invalid email or password.');
-    } finally {
-      setLoading(false);
+ const handleSubmit = async (e) => {
+  e.preventDefault();
+  setLoading(true);
+  setError('');
+  try {
+    // ১. Login → token পাও
+    const res = await api.post('/auth/login', form);
+    const token = res.data.token;
+    localStorage.setItem('token', token);
+
+    // ২. current-user call করো
+    const userRes = await api.get('/auth/current-user', {
+      headers: { Authorization: `Bearer ${token}` },
+    });
+    // user info localStorage এ রাখো + global state এ notify করো
+    const user = userRes.data;
+    localStorage.setItem('user', JSON.stringify(user));
+    window.dispatchEvent(new Event('userChanged'));
+
+    // ৩. role দেখে redirect
+    if (user.role === 'admin') {
+      window.location.href = '/admin';
+    } else {
+      window.location.href = '/products';
     }
-  };
+
+  } catch (err) {
+    setError(err.response?.data?.message || 'Login failed');
+  } finally {
+    setLoading(false);
+  }
+};
 
   return (
     <div className="min-h-screen bg-gray-50 flex items-center justify-center px-4">
@@ -48,7 +62,7 @@ export default function LoginPage() {
                 <path strokeLinecap="round" strokeLinejoin="round" d="M2.25 3h1.386c.51 0 .955.343 1.087.835l.383 1.437M7.5 14.25a3 3 0 00-3 3h15.75m-12.75-3h11.218c1.121-2.3 2.1-4.684 2.924-7.138a60.114 60.114 0 00-16.536-1.84M7.5 14.25L5.106 5.272M6 20.25a.75.75 0 11-1.5 0 .75.75 0 011.5 0zm12.75 0a.75.75 0 11-1.5 0 .75.75 0 011.5 0z" />
               </svg>
             </div>
-            <span className="text-base font-bold tracking-tight text-gray-900">Shop<span className="text-indigo-600">Nest</span></span>
+            <span className="text-[17px] font-bold tracking-tight text-gray-900">আমার<span className="text-indigo-600">-শপ</span></span>
           </Link>
           <h1 className="text-lg font-extrabold text-gray-900">Welcome back</h1>
           <p className="text-xs text-gray-400 mt-0.5">Sign in to your account</p>

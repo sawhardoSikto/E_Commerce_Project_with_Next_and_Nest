@@ -3,6 +3,7 @@
 import { useEffect, useState } from "react";
 import Link from "next/link";
 import api from "@/lib/api";
+import { useRouter } from "next/navigation";
 
 const STATUS_CONFIG = {
   pending: {
@@ -55,20 +56,27 @@ export default function OrdersPage() {
   const [loading, setLoading] = useState(true);
   const [expanded, setExpanded] = useState(null);
 
-  useEffect(() => {
-    const fetchOrders = async () => {
-      try {
-        const res = await api.get("/orders/my");
-        setOrders(res.data.data || res.data || []);
-      } catch (err) {
-        console.error(err);
-      } finally {
-        setLoading(false);
-      }
-    };
-    fetchOrders();
-  }, []);
+  const router = useRouter();
 
+  useEffect(() => {
+  const token = localStorage.getItem('token');
+  if (!token) {
+    router.push('/login'); 
+    return;
+  }
+  
+  const fetchOrders = async () => {
+    try {
+      const res = await api.get('/orders/my');
+      setOrders(res.data.data || res.data || []);
+    } catch (err) {
+      console.error(err);
+    } finally {
+      setLoading(false);
+    }
+  };
+  fetchOrders();
+}, []);
   const toggleExpand = (id) => setExpanded((prev) => (prev === id ? null : id));
 
   return (

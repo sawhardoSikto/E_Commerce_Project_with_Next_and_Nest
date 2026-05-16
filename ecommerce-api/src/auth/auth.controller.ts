@@ -26,18 +26,18 @@ export class AuthController {
         return this.authService.getProfile(req.user.id);
     }
     @Get('current-user')
-getCurrentUser(@Request() req) {
-  return req.user;
-}
+    getCurrentUser(@Request() req) {
+        return req.user;
+    }
     @IsPublic()
-@Post('forgot-password')
-forgotPassword(@Body() dto: ForgotPasswordDto) {
-  return this.authService.forgotPassword(dto);
-}
+    @Post('forgot-password')
+    forgotPassword(@Body() dto: ForgotPasswordDto) {
+        return this.authService.forgotPassword(dto);
+    }
 
-@IsPublic()
-@Post('reset-password')
-resetPassword(@Body() dto: ResetPasswordDto) {
-  return this.authService.resetPassword(dto);
-}
+    @IsPublic()
+    @Post('reset-password')
+    resetPassword(@Body() dto: ResetPasswordDto) {
+        return this.authService.resetPassword(dto);
+    }
 }

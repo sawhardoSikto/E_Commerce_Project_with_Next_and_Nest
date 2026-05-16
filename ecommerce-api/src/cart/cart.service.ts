@@ -1,4 +1,4 @@
-import { Injectable, NotFoundException } from '@nestjs/common';
+import { BadRequestException, Injectable, NotFoundException } from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
 import { Repository } from 'typeorm';
 import { CartItem } from './entities/cart-item.entity';
@@ -11,7 +11,7 @@ export class CartService {
     @InjectRepository(CartItem)
     private cartRepo: Repository<CartItem>,
     private productsService: ProductsService,
-  ) {}
+  ) { }
 
   // Cart e product add 
   async addToCart(userId: number, dto: AddToCartDto) {
@@ -44,7 +44,7 @@ export class CartService {
     return { message: 'Product added to cart', data: cartItem };
   }
 
-  
+
   async getMyCart(userId: number) {
     const items = await this.cartRepo.find({
       where: { user: { id: userId } },
@@ -71,5 +71,27 @@ export class CartService {
     if (!item) throw new NotFoundException('Cart item not found');
     await this.cartRepo.delete(cartItemId);
     return { message: 'Item removed from cart', id: cartItemId };
+  }
+
+  async updateQuantity(userId: number, cartItemId: number, quantity: number) {
+    const item = await this.cartRepo.findOne({
+      where: {
+        id: cartItemId,
+        user: {
+          id: userId,
+        },
+      },
+    });
+    if (!item) throw new NotFoundException('Cart item not found');
+    if (quantity < 1) throw new BadRequestException('Quantity must be at least 1');
+
+    await this.cartRepo
+      .createQueryBuilder()
+      .update(CartItem)
+      .set({ quantity })
+      .where('id = :id', { id: cartItemId })
+      .execute();
+
+    return { message: 'Quantity updated', id: cartItemId, quantity };
   }
 }
